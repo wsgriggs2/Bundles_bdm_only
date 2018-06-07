@@ -1,22 +1,23 @@
-function run_BDM_bundle_new(subID)
-%% run_BDM_bundle_new('888-1')
-%% run_BDM_bundle_new('004-3')
-
+function run_BDM_item_new_WGmac(subID)
+%% run_BDM_item_new_WGmac('888-1')
+%% run_BDM_item_new_WGmac('004-3')
+Screen('Preference','SkipSyncTests', 1);
 try
-
+    
     debug = 0;
     
     KbName('UnifyKeyNames');
     
+    %Screen('Preference','SkipSyncTests', 2);
+    
     % Load image files for the subject
     file_items = ['data/item_list_sub_',subID];
     load(file_items) % item_ids is loaded
-    bundle_list = bundle_item_seq;
-    num_trials = length(bundle_list);
+    item_list = bdm_item_seq;
     
     % Set window pointer
     if debug
-        %[wpt, rect] = Screen('OpenWindow', 0, [0, 0, 0], [0 0 800 600] * 1.5); w = rect(3); h = rect(4);
+        %[wpt, rect] = Screen('OpenWindow', 0, [0, 0, 0], [0 0 960 540] * 1.5); w = rect(3); h = rect(4);
         [wpt, rect] = Screen('OpenWindow', 0, [0, 0, 0], [0 0 1800 900]); w = rect(3); h = rect(4);
     else
         [wpt, rect] = Screen('OpenWindow', 0, [0, 0, 0]); w = rect(3); h = rect(4);
@@ -28,9 +29,10 @@ try
     % Preparation
     durITI = 0.5;
     durOUT = 0.5;
-    %d_tics = prep_tics_bundle(wpt, w, h);
+    num_trials = length(item_list);
+    %d_tics = prep_tics_item(wpt, w, h);
     w_bin = linspace(w * 0.2, w * 0.8, 6);
-    str_question = DispString('init', wpt, 'How much are you willing to pay for this bundle?', [0,-h/2.75], floor(h/17), [255, 255, 255], []);
+    str_question = DispString('init', wpt, 'How much are you willing to pay for this item?', [0,-h/2.75], floor(h/17), [255, 255, 255], []);
     
     % Prepare data
     time_ITI = []; time_DEC = []; time_OUT = [];
@@ -44,26 +46,19 @@ try
     for i = 1:num_trials
         
         % ITI
-        disp(['trial #',num2str(i),': ',num2str(bundle_list(i,:))])
+        disp(['trial #',num2str(i),': ',num2str(item_list(i))])
         time_ITIstrt = GetSecs - time_zero;
-        disp_fix(wpt, w, h, durITI)
+        disp_fix(wpt, w, h, durITI);
         time_ITIend = GetSecs - time_zero;
         time_ITI = [time_ITI; [time_ITIstrt, time_ITIend]];
         
         % BDM
-        if bundle_list(i,1) < 100
-            shown_item1 = ['data/imgs_food/item_',num2str(bundle_list(i,1)),'.jpg'];
-            itm_img1 = DispImage('init', wpt, shown_item1, [-w/7.0,-h/15], w/100, [100,100]);
-        else
-            shown_item1 = ['data/imgs_trinkets/item_',num2str(bundle_list(i,1)-100),'.jpg'];
-            itm_img1 = DispImage('init', wpt, shown_item1, [-w/7.0,-h/15], w/100, [100,100]);
-        end
-        if bundle_list(i,2) < 100
-            shown_item2 = ['data/imgs_food/item_',num2str(bundle_list(i,2)),'.jpg'];
-            itm_img2 = DispImage('init', wpt, shown_item2, [w/7.0,-h/15], w/100, [100,100]);
-        else
-            shown_item2 = ['data/imgs_trinkets/item_',num2str(bundle_list(i,2)-100),'.jpg'];
-            itm_img2 = DispImage('init', wpt, shown_item2, [w/7.0,-h/15], w/100, [100,100]);
+        if item_list(i) < 100
+            shown_item = ['data/imgs_food/item_',num2str(item_list(i)),'.jpg'];
+            itm_img = DispImage('init', wpt, shown_item, [0,-h/15], w/50, [140000/w,140000/w]);
+        elseif item_list(i) > 100
+            shown_item = ['data/imgs_trinkets/item_',num2str(item_list(i)-100),'.jpg'];
+            itm_img = DispImage('init', wpt, shown_item, [0,-h/15], w/50, [140000/w,140000/w]);
         end
         
         %target = ceil(rand() * length(w_bin));
@@ -73,19 +68,26 @@ try
         time_DECstrt = GetSecs - time_zero;
         bid=100;
         while 1
-            DispImage('draw', wpt, itm_img1);
-            DispImage('draw', wpt, itm_img2);
+            DispImage('draw', wpt, itm_img);
             DispString('draw', wpt, str_question);
-            bid_display(wpt, w, h, bid)
+            bid_display(wpt, w, h, bid);
             Screen(wpt,'Flip');
             
             keyRes = GetChar;
+            %fprintf('key pressed: %s',keyRes);
             [keyIsDown,secs,keyCode] = KbCheck;
             keyName = KbName(find(keyCode));
+            %fprintf('key2 pressed: %s',keyName);
             %disp('Pressed')
             %disp(keyName(1))
-            %key_num = str2num(keyRes);
+            key_num = str2num(keyRes);
             if length(keyName) > 0 && ischar(keyName)
+%                 disp('inside if statement')
+%                 disp(class(keyName))
+                % disp(keyName(1))
+                 %disp(keyName)
+%                 disp(length(keyName(1)))
+%                 disp(length(keyName))
                 key_num = str2num(keyName(1));
             else
                 key_num = [];
@@ -105,10 +107,10 @@ try
             
             %input your bid directly
             if isequal(keyName,'Return')
-                break
+                break;
             elseif isequal(keyName,'BackSpace')
                 bid = 100;
-            elseif isequal(keyName,'DLETE')
+            elseif isequal(keyName,'DELETE')
                 bid = 100;
             elseif isequal(keyName,'q')
                 Screen('CloseAll');
@@ -135,30 +137,29 @@ try
         
         % OUTCOME (FEEDBACK)
         time_OUTstrt = GetSecs - time_zero;
-        disp_out(wpt, w, h, valueBDM, durOUT)
+        disp_out(wpt, w, h, valueBDM, durOUT);
         time_OUTend = GetSecs - time_zero;
         time_OUT = [time_OUT; [time_OUTstrt, time_OUTend]];
         
         % save data
         value = [value; valueBDM];
-        item = [item; bundle_list(i,:)];
+        item = [item; item_list(i)];
        
-        DispImage('clear', itm_img1);
-        DispImage('clear', itm_img2);
+        DispImage('clear', itm_img);
         
     end 
     
     % data save and closing
-    fname_log = ['logs/bdm_bundle_sub_',subID];
+    fname_log = ['logs/bdm_items_sub_',subID];
     save(fname_log,'value','item','init_V','num_L','num_R');
     
-    durITI = 4;
+    durITI = 2;
     time_ITIstrt = GetSecs - time_zero;
-    disp_fix(wpt, w, h, durITI)
+    disp_fix(wpt, w, h, durITI);
     time_ITIend = GetSecs - time_zero;
     time_ITI = [time_ITI; [time_ITIstrt, time_ITIend]];
     
-    fname_log_time = ['logs/bdm_bundle_sub_',subID,'_time'];
+    fname_log_time = ['logs/bdm_items_sub_',subID,'_time'];
     save(fname_log_time, 'time_ITI', 'time_DEC', 'time_OUT');
     
     Screen('CloseAll');

@@ -1,6 +1,6 @@
-function run_BDM_bundle_new(subID)
-%% run_BDM_bundle_new('888-1')
-%% run_BDM_bundle_new('004-3')
+function run_BDM_bundle_new_WGMAC(subID)
+%% run_BDM_bundle_new_WGMAC('888-1')
+%% run_BDM_bundle_new_WGMAC('004-3')
 
 try
 
@@ -108,7 +108,7 @@ try
                 break
             elseif isequal(keyName,'BackSpace')
                 bid = 100;
-            elseif isequal(keyName,'DLETE')
+            elseif isequal(keyName,'DELETE')
                 bid = 100;
             elseif isequal(keyName,'q')
                 Screen('CloseAll');

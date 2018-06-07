@@ -8,7 +8,7 @@ function disp_out(wpt, w, h, value, dur)
     elseif ischar(value) | isstring(value)
         str_val = DispString('init', wpt, [value], [0, 0], floor(w/10), [255,255,255], []);
     end
-    DispString('draw', wpt, str_val)
+    DispString('draw', wpt, str_val);
     
     Screen(wpt,'Flip');
     t_strt = GetSecs;

@@ -1,7 +1,7 @@
 function run_BDM_item_new(subID)
 %% run_BDM_item_new('888-1')
-%% run_BDM_item_new('005-1')
-
+%% run_BDM_item_new('004-3')
+Screen('Preference','SkipSyncTests', 1);
 try
     
     debug = 0;
